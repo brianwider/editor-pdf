@@ -125,8 +125,13 @@ async function openFile(file, password = '') {
     if (data.wasEncrypted) say('El PDF se abrió sin contraseña. Podés ponerle una al descargarlo.');
   } catch (error) {
     if (error.status === 401) {
-      const next = prompt(error.message + ' Escribila para abrirlo:');
-      if (next) return openFile(file, next);
+      const input = el('input', { type: 'password', autocomplete: 'off' });
+      openDialog('PDF con contraseña', [field(error.message + ' Escribila para abrirlo:', input)], [
+        el('button', { class: 'primary', onclick: () => {
+          $('dialog').close();
+          if (input.value) openFile(file, input.value);
+        } }, 'Abrir'),
+      ]);
       return;
     }
     say(error.message, true);
@@ -1357,15 +1362,21 @@ function downloadDialog() {
   openDialog('Descargar PDF', [field('Páginas', pages), field('Contraseña para abrirlo', password)], [
     el('button', { class: 'primary', onclick: async () => {
       try {
-        const res = await postJson('/api/download', { pages: pages.value, password: password.value });
-        const blob = await res.blob();
-        const link = el('a', { href: URL.createObjectURL(blob), download: decodeURIComponent(res.headers.get('X-Filename')) });
-        link.click();
-        URL.revokeObjectURL(link.href);
+        if (window.pywebview) {
+          const result = await window.pywebview.api.save_pdf(pages.value, password.value);
+          if (result.error) throw new Error(result.error);
+          if (!result.saved) return;
+        } else {
+          const res = await postJson('/api/download', { pages: pages.value, password: password.value });
+          const blob = await res.blob();
+          const link = el('a', { href: URL.createObjectURL(blob), download: decodeURIComponent(res.headers.get('X-Filename')) });
+          link.click();
+          URL.revokeObjectURL(link.href);
+        }
         $('dialog').close();
         state.dirty = false;
-        $('saved').textContent = 'Descargado';
-        say('PDF descargado.');
+        $('saved').textContent = window.pywebview ? 'Guardado' : 'Descargado';
+        say(window.pywebview ? 'PDF guardado.' : 'PDF descargado.');
       } catch (error) {
         say(error.message, true);
       }
@@ -1548,10 +1559,10 @@ addEventListener('beforeunload', (event) => {
   try {
     state.capabilities = await api('/api/capabilities');
     if (state.capabilities.desktop) {
-      const ping = () => fetch('/api/ping').catch(() => {});
-      ping();
-      setInterval(ping, 15000);
-      addEventListener('pagehide', () => navigator.sendBeacon('/api/closed'));
+      let reported = false;
+      setInterval(() => {
+        if (window.pywebview && state.dirty !== reported) window.pywebview.api.set_dirty((reported = state.dirty));
+      }, 1000);
     }
     const current = await api('/api/state');
     if (!current.open) return;
