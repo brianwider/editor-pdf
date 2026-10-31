@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor de PDF</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="welcome">
+  <section class="pitch">
+    <div class="brand"><i data-icon="logo"></i>Editor de PDF</div>
+    <h1>Cambiá cualquier PDF escribiendo encima.</h1>
+    <p>Hacé clic en un texto y editalo. La letra, el tamaño y la posición se mantienen. Tu archivo no sale de esta computadora.</p>
+    <label class="button primary big"><i data-icon="open"></i>Elegir PDF<input type="file" accept="application/pdf,.pdf" class="picker"></label>
+    <small>O soltalo en cualquier parte de esta ventana.</small>
+  </section>
+  <div class="demo" aria-hidden="true">
+    <div class="demo-sheet">
+      <b>Presupuesto de obra</b>
+      <span class="demo-bar">Cliente: Acme SA</span>
+      <span class="demo-line"></span><span class="demo-line short"></span>
+      <div class="demo-total"><span>Total</span><span class="demo-edit" id="demoEdit">$ 1.500</span></div>
+      <svg viewBox="0 0 220 70" class="demo-sign"><path d="M8 52C34 6 46 8 44 34s-8 26 2 12S70 16 80 26s-4 22 8 14 18-18 26-10 2 16 14 8 18-12 28-6 14 4 56-8" /></svg>
+    </div>
+  </div>
+</main>
+<div id="app" hidden>
+  <div id="busy" hidden></div>
+  <header>
+    <div class="brand small"><i data-icon="logo"></i></div>
+    <div class="doc">
+      <span id="name"></span>
+      <small id="saved"></small>
+    </div>
+    <div class="group">
+      <button id="undo" class="icon" disabled title="Deshacer (⌘Z)" aria-label="Deshacer" data-icon="undo"></button>
+      <button id="redo" class="icon" disabled title="Rehacer (⇧⌘Z)" aria-label="Rehacer" data-icon="redo"></button>
+    </div>
+    <div class="spacer"></div>
+    <div class="group zoom">
+      <button id="zoomOut" class="icon" aria-label="Alejar" title="Alejar" data-icon="minus"></button>
+      <button id="zoomValue" title="Ajustar al ancho de la ventana">100%</button>
+      <button id="zoomIn" class="icon" aria-label="Acercar" title="Acercar" data-icon="plus"></button>
+    </div>
+    <button id="findOpen" class="icon" title="Buscar y reemplazar (⌘F)" aria-label="Buscar y reemplazar" data-icon="search"></button>
+    <button id="toolsOpen" class="icon" title="Más opciones" aria-label="Más opciones" data-icon="more"></button>
+    <label class="button ghost" title="Abrir otro PDF"><i data-icon="open"></i><span class="wide">Abrir</span><input type="file" accept="application/pdf,.pdf" class="picker"></label>
+    <button id="downloadOpen" class="primary" title="Descargar (⌘S)"><i data-icon="download"></i>Descargar</button>
+  </header>
+  <div id="findbar" hidden>
+    <input id="findText" placeholder="Buscar en el documento" aria-label="Buscar">
+    <span id="findCount"></span>
+    <button id="findPrev" class="icon" aria-label="Anterior" data-icon="up"></button>
+    <button id="findNext" class="icon" aria-label="Siguiente" data-icon="down"></button>
+    <label class="check"><input type="checkbox" id="findCase">Mayúsculas exactas</label>
+    <input id="replaceText" placeholder="Reemplazar por" aria-label="Reemplazar por">
+    <button id="replaceAll" class="ghost">Reemplazar todo</button>
+    <button id="findClose" class="icon" aria-label="Cerrar búsqueda" data-icon="close"></button>
+  </div>
+  <div id="work">
+    <nav id="rail" role="toolbar" aria-label="Herramientas">
+      <button class="tool active" data-tool="select" title="Editar y mover (V)"><i data-icon="cursor"></i>Editar</button>
+      <button class="tool" data-tool="text" title="Agregar texto (T)"><i data-icon="text"></i>Texto</button>
+      <button class="tool" data-tool="signature" title="Colocar firma (F)"><i data-icon="signature"></i>Firma</button>
+      <button class="tool" data-tool="image" title="Agregar imagen"><i data-icon="image"></i>Imagen</button>
+      <button class="tool" data-tool="highlight" title="Resaltar (H)"><i data-icon="marker"></i>Resaltar</button>
+      <button class="tool" data-tool="ink" title="Dibujar (D)"><i data-icon="pen"></i>Dibujar</button>
+      <button class="tool" data-tool="rect" title="Formas (R)"><i data-icon="shapes"></i>Formas</button>
+    </nav>
+    <aside id="thumbs" aria-label="Páginas"></aside>
+    <div id="pages"></div>
+    <aside id="panel" aria-label="Propiedades"></aside>
+  </div>
+</div>
+<dialog id="dialog"></dialog>
+<div id="status" role="status" aria-live="polite"></div>
+<input type="file" id="imagePick" accept="image/png,image/jpeg" hidden>
+<input type="file" id="signaturePick" accept="image/png,image/jpeg" hidden>
+<input type="file" id="fontPick" accept=".ttf,.otf" hidden>
+<input type="file" id="pdfPick" accept="application/pdf,.pdf" hidden>
+<script src="boot.js"></script>
+</body>
+</html>
